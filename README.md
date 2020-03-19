@@ -3,7 +3,19 @@
 ![.](https://github.com/Ibrokhimsadikov/ABD_Society/blob/master/Maya.JPG)
 
 
-## Application Link: https://ibrokhim-sadikov.shinyapps.io/test/
+## Application Link: 
+https://ibrokhim-sadikov.shinyapps.io/test/
+
+Quick guidline for scripts in this repository
+Global.R contains all utilis for this app, like packages, helpful preprocessings
+
+Ui.R contains ui part of the app
+
+Server.R contains server section of the app
+
+home.html contains html script for this app's homepage. All attributes in home section of the app are shiny integrated html.
+
+WWW File contains all dependencies of home.html like images and plugins
 
 ## Contact with Author: [here](https://www.linkedin.com/in/abe-sadikov-27b449179)
 
