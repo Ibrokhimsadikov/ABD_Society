@@ -32,3 +32,6 @@
 • https://github.com/slundberg/shap
 
 • https://pydata.org/nyc2018/schedule/presentation/47/
+
+### Presentation Deck 
+[Presentation](https://github.com/Ibrokhimsadikov/ABD_Society/blob/master/Queen_City_Hack_webinar.pdf)
