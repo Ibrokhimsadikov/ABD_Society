@@ -22,8 +22,13 @@
 
 ### Reference for H2O autoML and Lime:
 • https://uc-r.github.io/lime
+
 • https://github.com/thomasp85/lime
+
 • https://github.com/marcotcr/lime
+
 • https://christophm.github.io/interpretable-ml-book/shapley.html
+
 • https://github.com/slundberg/shap
+
 • https://pydata.org/nyc2018/schedule/presentation/47/
