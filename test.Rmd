@@ -1,0 +1,238 @@
+---
+title: "test"
+author: "SIR"
+date: "2/22/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(data.table)
+library(summarytools)
+library(h2o)
+library(waiter)
+library(dplyr)
+library(tidyverse)
+library(lime)
+library(recipes)
+library(Boruta)
+h2o.no_progress()  # turn off progress bars
+h2o.init()
+```
+
+
+```{r}
+df<- fread("./Newsample.csv")
+seq(1, max(df$V1), by=1)
+
+```
+
+```{r}
+data_h2o <- as.h2o(df)
+v=seq(1, h2o.nrow(data_h2o), by=1)
+v[1]
+```
+
+
+
+```{r}
+ #Split up the data set
+iris_test <- iris[1:5, 1:4]
+iris_train <- iris[-(1:5), 1:4]
+iris_lab <- iris[[5]][-(1:5)]
+
+# Create Random Forest model on iris data
+model <- train(iris_train, iris_lab, method = 'rf')
+
+# Create an explainer object
+explainer <- lime(iris_train, model)
+
+# Explain new observation
+explanation <- explain(iris_test, explainer, n_labels = 1, n_features = 2)
+
+
+plot_features(explanation)
+```
+
+
+
+
+
+
+
+
+```{r}
+df<- fread("./training.csv")
+#glimpse(df)
+count(df)
+```
+
+```{r}
+ missing <- df%>%
+    summarize_all(.funs = ~ sum(is.na(.)) / length(.)) %>%
+    gather() %>%
+    arrange(desc(value)) %>%
+    filter(value > 0)
+
+missing
+```
+
+```{r}
+ unique_numeric_values_tbl <-df  %>%
+    select_if(is.numeric) %>%
+    map_df(~ unique(.) %>% length()) %>%
+    gather() %>%
+    arrange(value) %>%
+    mutate(key = as_factor(key))
+ factor_limit <- 7
+  
+  num_2_factor_names <- unique_numeric_values_tbl %>%
+    filter(value < factor_limit) %>%
+    arrange(desc(value)) %>%
+    pull(key) %>%
+    as.character()
+  
+ rec_obj <- recipe(~ ., data = df) %>%
+ step_meanimpute(all_numeric()) %>%
+  prep(stringsAsFactors = FALSE)
+  train_new <- bake(rec_obj, df)
+  
+```
+
+
+```{r}
+missing_tbl <- train_new%>%
+    summarize_all(.funs = ~ sum(is.na(.)) / length(.)) %>%
+    gather() %>%
+    arrange(desc(value)) %>%
+    filter(value > 0)
+
+missing_tbl
+```
+
+```{r}
+boruta <- Boruta(target~., data = train_new, doTrace = 2)
+print(boruta)
+```
+```{r}
+plot(boruta, xlab = "", xaxt = "n")
+lz<-lapply(1:ncol(boruta$ImpHistory),function(i)
+  boruta$ImpHistory[is.finite(boruta$ImpHistory[,i]),i])
+names(lz) <- colnames(boruta$ImpHistory)
+Labels <- sort(sapply(lz,median))
+axis(side = 1,las=2,labels = names(Labels),
+     at = 1:ncol(boruta$ImpHistory), cex.axis = 0.7)
+```
+
+
+
+
+```{r}
+selected=getSelectedAttributes(boruta, withTentative = T)
+selected
+```
+
+```{r}
+ train_new%>%select(selected)
+
+```
+
+
+```{r}
+x_train1 <- train_new%>%select(selected)
+y_train1 <- train_new %>% select(target)
+df=bind_cols(y_train1, x_train1)
+#write.csv(df, file='Newsample.csv')
+data_h2o <- as.h2o(df)
+```
+
+
+
+```{r}
+splits_h2o <- h2o.splitFrame(data_h2o, ratios = c(0.7, 0.15), seed = 1234)
+train_h2o <- splits_h2o[[1]]
+valid_h2o <- splits_h2o[[2]]
+test_h2o  <- splits_h2o[[3]]
+```
+
+```{r}
+```
+
+
+```{r}
+y <- "target"
+x <- setdiff(names(train_h2o), y)
+prostate.glm <- h2o.glm(family= "gaussian", x= x, y=y, training_frame=train_h2o, validation_frame  = valid_h2o, lambda = 0, compute_p_values = TRUE, remove_collinear_columns = TRUE)
+prostate.glm@model$coefficients_table
+```
+
+```{r}
+# Retrieve a graphical plot of the standardized coefficient magnitudes
+h2o.std_coef_plot(prostate.glm)
+```
+
+```{r}
+# Print the coefficients table
+prostate.glm@model$coefficients_table
+```
+
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+per=h2o.performance(prostate.glm, newdata = test_h2o)
+prediction_h2o <- h2o.predict(prostate.glm, newdata = test_h2o) 
+```
+
+```{r}
+per
+```
+
+```{r}
+prediction_h2o
+```
+
+```{r}
+ #Run lime() on training set
+  explainer <- lime::lime(
+    as.data.frame(train_h2o[,-1]), 
+    model          = prostate.glm, 
+    bin_continuous = TRUE)
+  
+  
+  #Run explain() on explainer
+  explanation <- lime::explain(
+    as.data.frame(test_h2o[1:2,-1]), 
+    explainer    = explainer, 
+    n_labels     = 1, 
+    n_features   = 5,
+    kernel_width = 0.5)
+  
+  plot_features(explanation) +
+    labs(title = " Predictive Analytics: LIME Feature  Visualization",
+         subtitle = "Hold Out (Test) Set, selected Cases Shown")
+```
+
+```{r}
+explainer <- lime(as.data.frame(train_h2o), prostate.glm, bin_continuous = TRUE)
+```
+
+```{r}
+explanation <- explain( as.data.frame(test_h2o[15,]), explainer,  n_features = 6)
+```
+
+
+
+```{r}
+plot_features(explanation)
+```
+
+
+
+
+
