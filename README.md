@@ -1,3 +1,3 @@
 # ABD_Society
 
-!(/Maya.jpg)
+!(https://github.com/Ibrokhimsadikov/ABD_Society/blob/master/Maya.JPG)
