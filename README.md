@@ -11,9 +11,13 @@
 
 ### Links for detailed problem understanding on Subject matter:
 • https://eml.berkeley.edu/~saez/geo_slides.pdf
+
 • https://www.leadingonopportunity.org/report/executive-summary
+
 • https://scholar.harvard.edu/files/hendren/files/mobility_geo.pdf
+
 • https://opportunityinsights.org/
+
 
 
 ### Reference for H2O autoML and Lime:
