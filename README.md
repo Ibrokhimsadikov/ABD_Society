@@ -7,6 +7,7 @@
 https://ibrokhim-sadikov.shinyapps.io/test/
 
 Quick guidline for scripts in this repository
+
 Global.R contains all utilis for this app, like packages, helpful preprocessings
 
 Ui.R contains ui part of the app
